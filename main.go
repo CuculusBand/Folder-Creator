@@ -19,8 +19,8 @@ func main() {
 	app := InitializeApp(MyApp, MainWindow)
 	// Create UI
 	app.MakeUI()
-	print("Folder Creator is running...\n")
+	// print("Folder Creator is running...\n")
 	// Run the application
 	MainWindow.ShowAndRun()
-	print("Folder Creator is closed\n")
+	//print("Folder Creator is closed\n")
 }
