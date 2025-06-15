@@ -114,20 +114,20 @@ func (a *MainApp) selectTableFile() {
 		if reader == nil {
 			return
 		}
-		filePath := reader.URI().String()
+		FilePath := reader.URI().Path()
 		if runtime.GOOS == "windows" {
 			// Remove leading slash for Windows paths
-			if len(filePath) > 2 && filePath[0] == '/' && filePath[2] == ':' {
-				filePath = filePath[1:]
+			if len(FilePath) > 2 && FilePath[0] == '/' && FilePath[2] == ':' {
+				FilePath = FilePath[1:]
 			}
 			// Replace forward slashes with backslashes for Windows compatibility
-			filePath = strings.ReplaceAll(filePath, "/", "\\")
+			FilePath = strings.ReplaceAll(FilePath, "/", "\\")
 		}
 
-		a.FileLabel.SetText(filepath.Base(filePath))
+		a.FileLabel.SetText(filepath.Base(FilePath))
 		a.StatusLabel.SetText("Loading...")
 		// Load the file
-		if err := a.Processor.LoadFile(filePath); err != nil {
+		if err := a.Processor.LoadFile(FilePath); err != nil {
 			a.StatusLabel.SetText("Failed to load: " + err.Error())
 			return
 		}
