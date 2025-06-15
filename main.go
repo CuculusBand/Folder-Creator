@@ -11,8 +11,11 @@ import (
 
 func main() {
 	// createFolderStructure()
-	app := app.New()
-	mainWindow := app.NewWindow("Folder Creator")
+	MyApp := app.New()
+	// Load and Set the custom font file
+	customFont := fyne.NewStaticResource("NotoSans", LoadFont("assets/font/NotoSans-SemiBold.ttf"))
+	MyApp.Settings().SetTheme(&appTheme{font: customFont})
+	mainWindow := MyApp.NewWindow("Folder Creator")
 	mainWindow.Resize(fyne.NewSize(1280, 800))
 	mainWindow.SetFixedSize(true)
 	//mainWindow.SetContent(container.NewVBox(widget.NewLabel("<Folder Creator>\n")))
@@ -33,6 +36,6 @@ func main() {
 	// Run the application
 	mainWindow.Show()
 	print("Folder Creator is running...\n")
-	app.Run()
+	MyApp.Run()
 	print("Folder Creator is closed.\n")
 }
