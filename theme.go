@@ -8,11 +8,19 @@ import (
 )
 
 type appTheme struct {
-	font fyne.Resource
+	// font        fyne.Resource
+	regularFont fyne.Resource
 }
 
-func (m *appTheme) Font(s fyne.TextStyle) fyne.Resource {
-	return m.font
+// func (m *appTheme) Font(s fyne.TextStyle) fyne.Resource {
+// 	return m.font
+// }
+
+func (t *appTheme) Font(style fyne.TextStyle) fyne.Resource {
+	if style.Monospace {
+		return theme.DefaultTheme().Font(style) // 保持默认等宽字体
+	}
+	return t.regularFont
 }
 
 func (m *appTheme) Color(n fyne.ThemeColorName, v fyne.ThemeVariant) color.Color {
