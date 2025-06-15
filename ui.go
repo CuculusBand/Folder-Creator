@@ -146,7 +146,8 @@ func (a *MainApp) selectDestination() {
 		if list == nil {
 			return
 		}
-		a.Processor.DestPath = list.String()
+		//RawDestPath := list.Path()
+		a.Processor.DestPath = list.Path()
 		a.DestLabel.SetText(a.Processor.DestPath)
 		a.StatusLabel.SetText("Selected target path: " + filepath.Base(a.Processor.DestPath))
 	}, a.Window).Show()
