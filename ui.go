@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -22,6 +23,8 @@ type MainApp struct {
 	StatusLabel  *widget.Label
 	FileLabel    *widget.Label
 	DestLabel    *widget.Label
+	ThemeButton  *widget.Button
+	DarkMode     bool
 }
 
 // InitializeApp holds the application and window instances along with a file processor
@@ -30,10 +33,15 @@ func InitializeApp(app fyne.App, window fyne.Window) *MainApp {
 		App:       app,
 		Window:    window,
 		Processor: NewFileProcessor(),
+		DarkMode:  false,
 	}
 }
 
 func (a *MainApp) MakeUI() {
+	// Add theme control button
+	a.ThemeButton = widget.NewButton("🌙", a.toggleTheme)
+	// Set the DarkMode
+	a.setTheme(a.DarkMode)
 	// Create buttons
 	FileSelectButton := widget.NewButton("Select File", a.selectTableFile)
 	TargetSelectButton := widget.NewButton("Target Path", a.selectDestination)
@@ -49,6 +57,13 @@ func (a *MainApp) MakeUI() {
 		CreateButton,
 		ExitButton,
 	)
+	Title := widget.NewLabel("<Folder Creator>")
+	TitleContainer := container.NewHBox(
+		Title,
+		layout.NewSpacer(),
+		a.ThemeButton,
+	)
+
 	// Create Lables
 	a.StatusLabel = widget.NewLabel("Ready")
 	a.StatusLabel.Wrapping = fyne.TextWrapWord
@@ -87,7 +102,7 @@ func (a *MainApp) MakeUI() {
 	// Create the main content layout
 	content := container.NewBorder(
 		container.NewVBox(
-			widget.NewLabel("|Folder Creator|"),
+			TitleContainer,
 			widget.NewSeparator(),
 			fileInfo,
 			widget.NewSeparator(),
@@ -182,4 +197,27 @@ func (a *MainApp) generateFolders() {
 		return
 	}
 	a.StatusLabel.SetText(fmt.Sprintf("Sucessfully created %d folder(s)", successCount))
+}
+
+// Toggle the theme between light and dark mode
+func (a *MainApp) setTheme(dark bool) {
+	a.DarkMode = dark
+	// Save the theme preference
+	a.App.Preferences().SetBool("dark_mode", dark)
+	if dark {
+		a.App.Settings().SetTheme(theme.DarkTheme())
+	} else {
+		a.App.Settings().SetTheme(theme.LightTheme())
+	}
+}
+
+// Toggle the theme when the button is clicked
+func (a *MainApp) toggleTheme() {
+	a.setTheme(!a.DarkMode)
+	if a.DarkMode {
+		a.ThemeButton.SetText("☀️") // Show moon if dark mode is disabled
+	} else {
+		a.ThemeButton.SetText("🌙") // Show sun icon if dark mode is enabled
+	}
+	a.Window.Content().Refresh()
 }
