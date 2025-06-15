@@ -80,9 +80,9 @@ func (a *MainApp) MakeUI() {
 		},
 	)
 	// Config table's cloumn widths
-	a.PreviewTable.SetColumnWidth(0, 170)
+	a.PreviewTable.SetColumnWidth(0, 150)
 	for i := 1; i < 20; i++ {
-		a.PreviewTable.SetColumnWidth(i, 170)
+		a.PreviewTable.SetColumnWidth(i, 150)
 	}
 	// Create the main content layout
 	content := container.NewBorder(
@@ -146,7 +146,6 @@ func (a *MainApp) selectDestination() {
 		if list == nil {
 			return
 		}
-		//RawDestPath := list.Path()
 		a.Processor.DestPath = list.Path()
 		a.DestLabel.SetText(a.Processor.DestPath)
 		a.StatusLabel.SetText("Selected target path: " + filepath.Base(a.Processor.DestPath))
