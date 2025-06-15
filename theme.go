@@ -9,7 +9,6 @@ import (
 
 type appTheme struct {
 	font fyne.Resource
-	icon fyne.Resource
 }
 
 func (m *appTheme) Font(s fyne.TextStyle) fyne.Resource {
