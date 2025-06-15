@@ -9,7 +9,7 @@ func main() {
 	// Create the application
 	MyApp := app.NewWithID("FolderCreator")
 	// Load and Set the custom font file
-	customFont := fyne.NewStaticResource("NotoSans", LoadFont("assets/font/NotoSans-SemiBold.ttf"))
+	customFont := fyne.NewStaticResource("NotoSans", LoadFont("font/NotoSans-SemiBold.ttf"))
 	MyApp.Settings().SetTheme(&appTheme{font: customFont})
 	// Create the window
 	MainWindow := MyApp.NewWindow("Folder Creator")
