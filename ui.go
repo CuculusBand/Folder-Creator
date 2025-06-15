@@ -80,14 +80,14 @@ func (a *MainApp) MakeUI() {
 		},
 	)
 	// Config table's cloumn widths
-	a.PreviewTable.SetColumnWidth(0, 200)
+	a.PreviewTable.SetColumnWidth(0, 170)
 	for i := 1; i < 20; i++ {
-		a.PreviewTable.SetColumnWidth(i, 200)
+		a.PreviewTable.SetColumnWidth(i, 170)
 	}
 	// Create the main content layout
 	content := container.NewBorder(
 		container.NewVBox(
-			widget.NewLabel("Folder Creator"),
+			widget.NewLabel("|Folder Creator|"),
 			widget.NewSeparator(),
 			fileInfo,
 			widget.NewSeparator(),
