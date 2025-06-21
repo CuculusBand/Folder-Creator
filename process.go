@@ -23,7 +23,7 @@ func NewFileProcessor() *FileProcessor {
 }
 
 // load CSV file
-func (p *FileProcessor) readCSVFile(filePath string) ([][]string, error) {
+func (p *FileProcessor) ReadCSVFile(filePath string) ([][]string, error) {
 	file, err := os.Open(filePath)
 	if err != nil {
 		return nil, err
@@ -36,7 +36,7 @@ func (p *FileProcessor) readCSVFile(filePath string) ([][]string, error) {
 }
 
 // load XLSX file
-func (p *FileProcessor) readXLSXFile(filePath string) ([][]string, error) {
+func (p *FileProcessor) ReadXLSXFile(filePath string) ([][]string, error) {
 	f, err := excelize.OpenFile(filePath)
 	if err != nil {
 		return nil, err
@@ -77,9 +77,9 @@ func (p *FileProcessor) LoadFile(filePath string) error {
 
 	switch ext {
 	case ".csv":
-		data, err = p.readCSVFile(filePath)
+		data, err = p.ReadCSVFile(filePath)
 	case ".xlsx":
-		data, err = p.readXLSXFile(filePath)
+		data, err = p.ReadXLSXFile(filePath)
 	default:
 		err = fmt.Errorf("file not supported: %s", ext)
 	}

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"time"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 )
@@ -17,6 +19,7 @@ func main() {
 	MainWindow.SetFixedSize(true)
 	MainWindow.CenterOnScreen()
 	app := InitializeApp(MyApp, MainWindow)
+	time.Sleep(50 * time.Millisecond)
 	// Create UI
 	app.MakeUI()
 	// Run the application

@@ -2,11 +2,13 @@ package main
 
 import (
 	"fmt"
+	"image/color"
 	"path/filepath"
 	"runtime"
 	"strings"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
@@ -21,10 +23,15 @@ type MainApp struct {
 	Processor    *FileProcessor
 	PreviewTable *widget.Table
 	StatusLabel  *widget.Label
-	FileLabel    *widget.Label
-	DestLabel    *widget.Label
+	FilePath     *PathDisplay
+	DestPath     *PathDisplay
 	ThemeButton  *widget.Button
 	DarkMode     bool
+}
+
+type PathDisplay struct {
+	Text      *canvas.Text
+	Container *container.Scroll
 }
 
 // InitializeApp holds the application and window instances along with a file processor
@@ -37,16 +44,17 @@ func InitializeApp(app fyne.App, window fyne.Window) *MainApp {
 	}
 }
 
+// Sets up the UI for the application
 func (a *MainApp) MakeUI() {
 	// Add theme control button
-	a.ThemeButton = widget.NewButton("🌙", a.toggleTheme)
+	a.ThemeButton = widget.NewButton("🌙", a.ToggleTheme)
 	// Set the DarkMode
-	a.setTheme(a.DarkMode)
+	a.SetTheme(a.DarkMode)
 	// Create buttons
-	FileSelectButton := widget.NewButton("Select File", a.selectTableFile)
-	TargetSelectButton := widget.NewButton("Target Path", a.selectDestination)
-	ClearButton := widget.NewButton("Clear", a.clearAll)
-	CreateButton := widget.NewButton("Create", a.generateFolders)
+	FileSelectButton := widget.NewButton("Select File", a.SelectTableFile)
+	TargetSelectButton := widget.NewButton("Target Path", a.SelectDestination)
+	ClearButton := widget.NewButton("Clear", a.ClearAll)
+	CreateButton := widget.NewButton("Create", a.GenerateFolders)
 	ExitButton := widget.NewButton("Exit", func() { a.App.Quit() })
 	// Button layout
 	buttonRow := container.NewHBox(
@@ -57,22 +65,30 @@ func (a *MainApp) MakeUI() {
 		CreateButton,
 		ExitButton,
 	)
+	// Set the title of the app
 	Title := widget.NewLabel("<Folder Creator>")
 	TitleContainer := container.NewHBox(
 		Title,
 		layout.NewSpacer(),
 		a.ThemeButton,
 	)
-
-	// Create Lables
+	// Create Labels for paths
+	// Set min size for labels and add scrolls
+	a.FilePath = CreatePathDisplay()
+	a.DestPath = CreatePathDisplay()
+	// Create status Lables
 	a.StatusLabel = widget.NewLabel("Ready")
 	a.StatusLabel.Wrapping = fyne.TextWrapWord
-	a.FileLabel = widget.NewLabel("No file selected")
-	a.DestLabel = widget.NewLabel("No destination selected")
 	// File information area
-	fileInfo := container.NewGridWithColumns(2,
-		widget.NewLabel("Table file:"), a.FileLabel,
-		widget.NewLabel("Targer path:"), a.DestLabel,
+	fileInfo := container.NewVBox(
+		container.NewHBox(
+			widget.NewLabel("Table file:	"),
+			a.FilePath.Container,
+		),
+		container.NewHBox(
+			widget.NewLabel("Target path:	"),
+			a.DestPath.Container,
+		),
 	)
 	// Create preview table
 	a.PreviewTable = widget.NewTable(
@@ -119,8 +135,24 @@ func (a *MainApp) MakeUI() {
 	a.Window.SetContent(content)
 }
 
+// Use widget.Entry to create a label for displaying file paths
+func CreatePathDisplay() *PathDisplay {
+	// Set text first
+	Text := canvas.NewText("No Selection", color.Black)
+	Text.TextSize = 15
+	Text.TextStyle = fyne.TextStyle{Monospace: false, Bold: true}
+	// Create a scrollable container for the text
+	Scroll := container.NewHScroll(Text)
+	Scroll.SetMinSize(fyne.NewSize(475, 45))
+	return &PathDisplay{
+		Text:      Text,
+		Container: Scroll,
+	}
+
+}
+
 // Select a file to load table data
-func (a *MainApp) selectTableFile() {
+func (a *MainApp) SelectTableFile() {
 	dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
 		if err != nil {
 			a.StatusLabel.SetText("Wrong file: " + err.Error())
@@ -138,8 +170,10 @@ func (a *MainApp) selectTableFile() {
 			// Replace forward slashes with backslashes for Windows compatibility
 			FilePath = strings.ReplaceAll(FilePath, "/", "\\")
 		}
-
-		a.FileLabel.SetText(filepath.Base(FilePath))
+		// Set the file path to the label
+		a.FilePath.Text.Text = FilePath
+		a.FilePath.Text.Refresh()
+		// a.FilePath.Path.Text = filepath.Base(FilePath)
 		a.StatusLabel.SetText("Loading...")
 		// Load the file
 		if err := a.Processor.LoadFile(FilePath); err != nil {
@@ -152,7 +186,7 @@ func (a *MainApp) selectTableFile() {
 }
 
 // Select a destination folder to create new folders
-func (a *MainApp) selectDestination() {
+func (a *MainApp) SelectDestination() {
 	dialog.NewFolderOpen(func(list fyne.ListableURI, err error) {
 		if err != nil {
 			a.StatusLabel.SetText("Wrong target path: " + err.Error())
@@ -162,22 +196,25 @@ func (a *MainApp) selectDestination() {
 			return
 		}
 		a.Processor.DestPath = list.Path()
-		a.DestLabel.SetText(a.Processor.DestPath)
+		a.DestPath.Text.Text = a.Processor.DestPath
+		a.DestPath.Text.Refresh()
 		a.StatusLabel.SetText("Selected target path: " + filepath.Base(a.Processor.DestPath))
 	}, a.Window).Show()
 }
 
 // Clear all content in the table
-func (a *MainApp) clearAll() {
+func (a *MainApp) ClearAll() {
 	a.Processor.Clear()
-	a.FileLabel.SetText("No file selected")
-	a.DestLabel.SetText("No destination selected")
+	a.FilePath.Text.Text = "No Selection"
+	a.FilePath.Text.Refresh()
+	a.DestPath.Text.Text = "No Selection"
+	a.DestPath.Text.Refresh()
 	a.StatusLabel.SetText("All content cleared")
 	a.PreviewTable.Refresh()
 }
 
 // Create folders based on the loaded table data
-func (a *MainApp) generateFolders() {
+func (a *MainApp) GenerateFolders() {
 	if a.Processor.TableFilePath == "" {
 		a.StatusLabel.SetText("Select a file first!")
 		return
@@ -200,7 +237,7 @@ func (a *MainApp) generateFolders() {
 }
 
 // Toggle the theme between light and dark mode
-func (a *MainApp) setTheme(dark bool) {
+func (a *MainApp) SetTheme(dark bool) {
 	a.DarkMode = dark
 	// Save the theme preference
 	a.App.Preferences().SetBool("dark_mode", dark)
@@ -212,8 +249,8 @@ func (a *MainApp) setTheme(dark bool) {
 }
 
 // Toggle the theme when the button is clicked
-func (a *MainApp) toggleTheme() {
-	a.setTheme(!a.DarkMode)
+func (a *MainApp) ToggleTheme() {
+	a.SetTheme(!a.DarkMode)
 	if a.DarkMode {
 		a.ThemeButton.SetText("☀️") // Show moon if dark mode is disabled
 	} else {
