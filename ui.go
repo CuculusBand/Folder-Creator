@@ -156,7 +156,7 @@ func (a *MainApp) MakeUI() {
 				a.DestPath.UpdateWidth(a.Window)
 				lastSize = currentSize
 			}
-			time.Sleep(100 * time.Millisecond)
+			time.Sleep(200 * time.Millisecond)
 		}
 	}()
 }
@@ -258,8 +258,6 @@ func (a *MainApp) ClearAll() {
 	a.DestPath.Text.Text = "No Selection"
 	a.DestPath.Text.Refresh()
 	a.ResetPathScroll()
-	// Reset Processor
-	a.Processor = NewFileProcessor()
 	// Reset table
 	a.PreviewTable = a.InitializeTable()
 	// Update table container
@@ -268,6 +266,10 @@ func (a *MainApp) ClearAll() {
 	a.ResetTableScroll()
 	// Update status
 	a.StatusLabel.SetText("All content cleared")
+	// Cleanup ram
+	a.Cleanup()
+	// Reset Processor
+	a.Processor = NewFileProcessor()
 }
 
 // Reset scrollbar of PathDisplay
@@ -301,7 +303,7 @@ func (a *MainApp) InitializeTable() *widget.Table {
 			return len(a.Processor.TableData), len(a.Processor.TableData[0])
 		},
 		func() fyne.CanvasObject {
-			return widget.NewLabel("")
+			return widget.NewLabelWithStyle("", fyne.TextAlignLeading, fyne.TextStyle{})
 		},
 		func(i widget.TableCellID, o fyne.CanvasObject) {
 			label := o.(*widget.Label)
@@ -398,13 +400,25 @@ func (a *MainApp) SetTheme(isDark bool) {
 // Toggle the theme when the button is clicked
 func (a *MainApp) ToggleTheme() {
 	a.SetTheme(!a.DarkMode)
+	time.Sleep(150 * time.Millisecond)
 	if a.DarkMode {
 		a.ThemeButton.SetText("☀️") // Show sun icon if dark mode is enabled
 	} else {
 		a.ThemeButton.SetText("🌙") // Show moon icon if dark mode is disabled
 	}
-	a.Window.Content().Refresh()
 	// Update PathDisplays's colors
 	a.FilePath.RefreshColor(a.DarkMode)
 	a.DestPath.RefreshColor(a.DarkMode)
+	runtime.GC() // Cleanup ram
+	// Refresh window
+	time.Sleep(100 * time.Millisecond)
+	a.Window.Content().Refresh()
+	runtime.GC() // Cleanup ram
+}
+
+// Cleanup ram
+func (a *MainApp) Cleanup() {
+	a.Processor = nil
+	a.PreviewTable = nil
+	runtime.GC()
 }
