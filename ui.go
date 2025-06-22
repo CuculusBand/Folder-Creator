@@ -63,7 +63,7 @@ func (a *MainApp) MakeUI() {
 
 	// Create a rectangle to control the minimum size of the window
 	bg := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
-	bg.SetMinSize(fyne.NewSize(650, 900))
+	bg.SetMinSize(fyne.NewSize(600, 500))
 
 	// Set the title of the app
 	title := widget.NewLabel("<Folder Creator>")
@@ -81,8 +81,8 @@ func (a *MainApp) MakeUI() {
 	a.FilePath.RefreshColor(a.DarkMode)
 	a.DestPath.RefreshColor(a.DarkMode)
 	// Set default width
-	a.FilePath.UpdateWidth(a.Window)
-	a.DestPath.UpdateWidth(a.Window)
+	a.FilePath.UpdatePathDisplayWidth(a.Window)
+	a.DestPath.UpdatePathDisplayWidth(a.Window)
 	// Display paths using two containers
 	fileInfo := container.NewVBox(
 		container.NewHBox(
@@ -140,7 +140,6 @@ func (a *MainApp) MakeUI() {
 		layout.NewStackLayout(),
 		bg,
 		contentContainer,
-		bg,
 	)
 
 	// Set the content
@@ -152,11 +151,11 @@ func (a *MainApp) MakeUI() {
 		for {
 			currentSize := a.Window.Canvas().Size()
 			if currentSize != lastSize {
-				a.FilePath.UpdateWidth(a.Window)
-				a.DestPath.UpdateWidth(a.Window)
+				a.FilePath.UpdatePathDisplayWidth(a.Window)
+				a.DestPath.UpdatePathDisplayWidth(a.Window)
 				lastSize = currentSize
 			}
-			time.Sleep(200 * time.Millisecond)
+			time.Sleep(100 * time.Millisecond)
 		}
 	}()
 }
@@ -347,9 +346,9 @@ func (a *MainApp) GenerateFolders() {
 }
 
 // Update PathDisplay width based on the window size
-func (pd *PathDisplay) UpdateWidth(window fyne.Window) {
+func (pd *PathDisplay) UpdatePathDisplayWidth(window fyne.Window) {
 	winWidth := window.Canvas().Size().Width
-	minWidth := float32(350)
+	minWidth := float32(300)
 	targetWidth := winWidth * 0.8
 	targetWidth = max(minWidth, targetWidth)
 	pd.Container.SetMinSize(fyne.NewSize(targetWidth, 45))
