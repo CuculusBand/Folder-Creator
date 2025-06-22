@@ -37,20 +37,26 @@ type PathDisplay struct {
 
 // InitializeApp holds the application and window instances along with a file processor
 func InitializeApp(app fyne.App, window fyne.Window) *MainApp {
+	isDark := app.Preferences().BoolWithFallback("dark_mode", false) // Check if dark mode is enabled in preferences
 	return &MainApp{
 		App:       app,
 		Window:    window,
 		Processor: NewFileProcessor(),
-		DarkMode:  false,
+		DarkMode:  isDark,
 	}
 }
 
 // Sets up the UI for the application
 func (a *MainApp) MakeUI() {
-	// Add theme control button, refreshes the theme when clicked
-	a.ThemeButton = widget.NewButton("🌙", a.ToggleTheme)
-	// Set the theme when the app starts
+	// Set the theme based on the dark mode preference when the app starts
 	a.SetTheme(a.DarkMode)
+	// Add theme control button, refreshes the theme when clicked
+	// The button's style is based on the current theme
+	if a.DarkMode {
+		a.ThemeButton = widget.NewButton("☀️", a.ToggleTheme)
+	} else {
+		a.ThemeButton = widget.NewButton("🌙", a.ToggleTheme)
+	}
 	// Create buttons
 	FileSelectButton := widget.NewButton("Select File", a.SelectTableFile)
 	TargetSelectButton := widget.NewButton("Target Path", a.SelectDestination)
@@ -77,6 +83,9 @@ func (a *MainApp) MakeUI() {
 	// Create scrollable path displays
 	a.FilePath = CreatePathDisplay()
 	a.DestPath = CreatePathDisplay()
+	// Refresh the colors of the path displays based on the theme
+	a.FilePath.RefreshColor(a.DarkMode)
+	a.DestPath.RefreshColor(a.DarkMode)
 	// Create status Lables
 	a.StatusLabel = widget.NewLabel("Ready")
 	a.StatusLabel.Wrapping = fyne.TextWrapWord
