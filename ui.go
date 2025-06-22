@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -59,11 +60,15 @@ func (a *MainApp) MakeUI() {
 		a.ThemeButton = widget.NewButton("🌙", a.ToggleTheme)
 	}
 
+	// Create a rectangle to control the minimum size of the window
+	bg := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
+	bg.SetMinSize(fyne.NewSize(650, 900))
+
 	// Set the title of the app
-	Title := widget.NewLabel("<Folder Creator>")
+	title := widget.NewLabel("<Folder Creator>")
 	// Title and theme button layout
 	TitleContainer := container.NewHBox(
-		Title,
+		title,
 		layout.NewSpacer(),
 		a.ThemeButton,
 	)
@@ -74,6 +79,9 @@ func (a *MainApp) MakeUI() {
 	// Refresh the colors of the path displays based on the theme
 	a.FilePath.RefreshColor(a.DarkMode)
 	a.DestPath.RefreshColor(a.DarkMode)
+	// Set default width
+	a.FilePath.UpdateWidth(a.Window)
+	a.DestPath.UpdateWidth(a.Window)
 	// Display paths using two containers
 	fileInfo := container.NewVBox(
 		container.NewHBox(
@@ -87,19 +95,19 @@ func (a *MainApp) MakeUI() {
 	)
 
 	// Create buttons
-	FileSelectButton := widget.NewButton("Select File", a.SelectTableFile)
-	TargetSelectButton := widget.NewButton("Target Path", a.SelectDestination)
-	ClearButton := widget.NewButton("Clear", a.ClearAll)
-	CreateButton := widget.NewButton("Create", a.GenerateFolders)
-	ExitButton := widget.NewButton("Exit", func() { a.App.Quit() })
+	fileSelectButton := widget.NewButton("Select File", a.SelectTableFile)
+	targetSelectButton := widget.NewButton("Target Path", a.SelectDestination)
+	clearButton := widget.NewButton("Clear", a.ClearAll)
+	createButton := widget.NewButton("Create", a.GenerateFolders)
+	exitButton := widget.NewButton("Exit", func() { a.App.Quit() })
 	// Button layout
 	buttonRow := container.NewHBox(
-		FileSelectButton,
-		TargetSelectButton,
+		fileSelectButton,
+		targetSelectButton,
 		layout.NewSpacer(),
-		ClearButton,
-		CreateButton,
-		ExitButton,
+		clearButton,
+		createButton,
+		exitButton,
 	)
 
 	// Create status Lables
@@ -136,7 +144,7 @@ func (a *MainApp) MakeUI() {
 	}
 
 	// Create the main content layout
-	content := container.NewBorder(
+	contentContainer := container.NewBorder(
 		container.NewVBox(
 
 			TitleContainer,
@@ -152,9 +160,30 @@ func (a *MainApp) MakeUI() {
 		nil,
 		container.NewScroll(a.PreviewTable),
 	)
-	
+
+	fullWindow := container.New(
+		layout.NewStackLayout(),
+		bg,
+		contentContainer,
+		bg,
+	)
+
 	// Set the content
-	a.Window.SetContent(content)
+	a.Window.SetContent(fullWindow)
+
+	// Update PathDisplays' width based on window size
+	go func() {
+		lastSize := a.Window.Canvas().Size()
+		for {
+			currentSize := a.Window.Canvas().Size()
+			if currentSize != lastSize {
+				a.FilePath.UpdateWidth(a.Window)
+				a.DestPath.UpdateWidth(a.Window)
+				lastSize = currentSize
+			}
+			time.Sleep(100 * time.Millisecond)
+		}
+	}()
 }
 
 // Use canvas to display file paths
@@ -168,9 +197,9 @@ func CreatePathDisplay(window fyne.Window) *PathDisplay {
 	// Get width of the window
 	windowWidth := window.Canvas().Size().Width
 	// Set min size for labels and add scrolls
-	minWidth := float32(400)
+	minWidth := float32(350)
 	// Calculate target width
-	targetWidth := windowWidth * 0.8
+	targetWidth := windowWidth * 0.85
 	scrollLength := max(targetWidth, minWidth)
 	scroll.SetMinSize(fyne.NewSize(scrollLength, 45))
 	return &PathDisplay{
@@ -279,6 +308,15 @@ func (a *MainApp) GenerateFolders() {
 	}
 	a.PreviewTable.Refresh()
 	a.StatusLabel.SetText(fmt.Sprintf("Sucessfully created %d folder(s)", successCount))
+}
+
+// Update PathDisplay width based on the window size
+func (pd *PathDisplay) UpdateWidth(window fyne.Window) {
+	winWidth := window.Canvas().Size().Width
+	minWidth := float32(350)
+	targetWidth := winWidth * 0.8
+	targetWidth = max(minWidth, targetWidth)
+	pd.Container.SetMinSize(fyne.NewSize(targetWidth, 45))
 }
 
 // Adjusts the column widths based on the content
