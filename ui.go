@@ -19,15 +19,16 @@ import (
 
 // MainApp holds the main application structure, including the app, window, and file processor
 type MainApp struct {
-	App          fyne.App
-	Window       fyne.Window
-	Processor    *FileProcessor
-	PreviewTable *widget.Table
-	StatusLabel  *widget.Label
-	FilePath     *PathDisplay
-	DestPath     *PathDisplay
-	ThemeButton  *widget.Button
-	DarkMode     bool
+	App                   fyne.App
+	Window                fyne.Window
+	Processor             *FileProcessor
+	StatusLabel           *widget.Label
+	FilePath              *PathDisplay
+	DestPath              *PathDisplay
+	ThemeButton           *widget.Button
+	PreviewTable          *widget.Table
+	PreviewTableContainer *container.Scroll
+	DarkMode              bool
 }
 
 // PathDisplay shows the file or folder path in a scrollable text container
@@ -115,38 +116,12 @@ func (a *MainApp) MakeUI() {
 	a.StatusLabel.Wrapping = fyne.TextWrapWord
 
 	// Create preview table
-	a.PreviewTable = widget.NewTable(
-		func() (int, int) {
-			if len(a.Processor.TableData) == 0 {
-				return 1, 1
-			}
-			return len(a.Processor.TableData), len(a.Processor.TableData[0])
-		},
-		func() fyne.CanvasObject {
-			return widget.NewLabel("")
-		},
-		func(i widget.TableCellID, o fyne.CanvasObject) {
-			label := o.(*widget.Label)
-			if len(a.Processor.TableData) > i.Row && len(a.Processor.TableData[i.Row]) > i.Col {
-				label.SetText(a.Processor.TableData[i.Row][i.Col])
-			} else {
-				label.SetText("")
-			}
-		},
-	)
-	// Config table's column widths
-	numCols := 1
-	if len(a.Processor.TableData) > 0 {
-		numCols = len(a.Processor.TableData[0])
-	}
-	for i := 0; i < numCols; i++ {
-		a.PreviewTable.SetColumnWidth(i, 100)
-	}
+	a.PreviewTable = a.InitializeTable()
+	a.PreviewTableContainer = container.NewScroll(a.PreviewTable)
 
 	// Create the main content layout
 	contentContainer := container.NewBorder(
 		container.NewVBox(
-
 			TitleContainer,
 			widget.NewSeparator(),
 			fileInfo,
@@ -158,7 +133,7 @@ func (a *MainApp) MakeUI() {
 		a.StatusLabel,
 		nil,
 		nil,
-		container.NewScroll(a.PreviewTable),
+		a.PreviewTableContainer,
 	)
 
 	fullWindow := container.New(
@@ -248,8 +223,13 @@ func (a *MainApp) SelectTableFile() {
 			a.StatusLabel.SetText("Failed to load: " + err.Error())
 			return
 		}
-		a.PreviewTable.Refresh()
 		a.AutoUpdateColumnWidths() // Update the table columns
+		a.PreviewTable.Refresh()
+		a.PreviewTableContainer.Refresh()
+		// Reset scrollbar
+		a.PreviewTableContainer.ScrollToTop()
+		a.PreviewTableContainer.Offset = fyne.Position{X: 0, Y: 0}
+		a.PreviewTableContainer.Refresh()
 		a.StatusLabel.SetText(fmt.Sprintf("All data loaded: %d rows", len(a.Processor.TableData)))
 	}, a.Window).Show()
 }
@@ -273,13 +253,47 @@ func (a *MainApp) SelectDestination() {
 
 // Clear all content in the table
 func (a *MainApp) ClearAll() {
-	a.Processor.Clear()
 	a.FilePath.Text.Text = "No Selection"
 	a.FilePath.Text.Refresh()
+	a.FilePath.Container.Offset = fyne.Position{X: 0, Y: 0} // Reset scrollbar position
+	a.FilePath.Container.Refresh()
 	a.DestPath.Text.Text = "No Selection"
 	a.DestPath.Text.Refresh()
+	a.DestPath.Container.Offset = fyne.Position{X: 0, Y: 0} // Reset scrollbar position
+	a.DestPath.Container.Refresh()
+	a.Processor.Clear()
+	// Skip clearing if no table is loaded
+	if len(a.Processor.TableData) == 0 {
+		// Empty implementation
+	} else {
+		a.ResetTable()
+		a.PreviewTableContainer.Offset = fyne.Position{X: 0, Y: 0}
+	}
 	a.StatusLabel.SetText("All content cleared")
-	a.PreviewTable.Refresh()
+}
+
+// Create table
+func (a *MainApp) InitializeTable() *widget.Table {
+	a.PreviewTable = widget.NewTable(
+		func() (int, int) {
+			if len(a.Processor.TableData) == 0 {
+				return 0, 0
+			}
+			return len(a.Processor.TableData), len(a.Processor.TableData[0])
+		},
+		func() fyne.CanvasObject {
+			return widget.NewLabel("")
+		},
+		func(i widget.TableCellID, o fyne.CanvasObject) {
+			label := o.(*widget.Label)
+			if len(a.Processor.TableData) > i.Row && len(a.Processor.TableData[i.Row]) > i.Col {
+				label.SetText(a.Processor.TableData[i.Row][i.Col])
+			} else {
+				label.SetText("")
+			}
+		},
+	)
+	return a.PreviewTable
 }
 
 // Generate folders and update the status label
