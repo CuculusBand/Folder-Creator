@@ -48,6 +48,7 @@ func InitializeApp(app fyne.App, window fyne.Window) *MainApp {
 
 // Sets up the UI for the application
 func (a *MainApp) MakeUI() {
+
 	// Set the theme based on the dark mode preference when the app starts
 	a.SetTheme(a.DarkMode)
 	// Add theme control button, refreshes the theme when clicked
@@ -57,6 +58,34 @@ func (a *MainApp) MakeUI() {
 	} else {
 		a.ThemeButton = widget.NewButton("🌙", a.ToggleTheme)
 	}
+
+	// Set the title of the app
+	Title := widget.NewLabel("<Folder Creator>")
+	// Title and theme button layout
+	TitleContainer := container.NewHBox(
+		Title,
+		layout.NewSpacer(),
+		a.ThemeButton,
+	)
+
+	// Create scrollable path displays
+	a.FilePath = CreatePathDisplay(a.Window)
+	a.DestPath = CreatePathDisplay(a.Window)
+	// Refresh the colors of the path displays based on the theme
+	a.FilePath.RefreshColor(a.DarkMode)
+	a.DestPath.RefreshColor(a.DarkMode)
+	// Display paths using two containers
+	fileInfo := container.NewVBox(
+		container.NewHBox(
+			widget.NewLabel("Table file:	"),
+			a.FilePath.Container,
+		),
+		container.NewHBox(
+			widget.NewLabel("Target path:	"),
+			a.DestPath.Container,
+		),
+	)
+
 	// Create buttons
 	FileSelectButton := widget.NewButton("Select File", a.SelectTableFile)
 	TargetSelectButton := widget.NewButton("Target Path", a.SelectDestination)
@@ -72,34 +101,11 @@ func (a *MainApp) MakeUI() {
 		CreateButton,
 		ExitButton,
 	)
-	// Set the title of the app
-	Title := widget.NewLabel("<Folder Creator>")
-	// Title and theme button layout
-	TitleContainer := container.NewHBox(
-		Title,
-		layout.NewSpacer(),
-		a.ThemeButton,
-	)
-	// Create scrollable path displays
-	a.FilePath = CreatePathDisplay(a.Window)
-	a.DestPath = CreatePathDisplay(a.Window)
-	// Refresh the colors of the path displays based on the theme
-	a.FilePath.RefreshColor(a.DarkMode)
-	a.DestPath.RefreshColor(a.DarkMode)
+
 	// Create status Lables
 	a.StatusLabel = widget.NewLabel("Ready")
 	a.StatusLabel.Wrapping = fyne.TextWrapWord
-	// File information area
-	fileInfo := container.NewVBox(
-		container.NewHBox(
-			widget.NewLabel("Table file:	"),
-			a.FilePath.Container,
-		),
-		container.NewHBox(
-			widget.NewLabel("Target path:	"),
-			a.DestPath.Container,
-		),
-	)
+
 	// Create preview table
 	a.PreviewTable = widget.NewTable(
 		func() (int, int) {
@@ -126,11 +132,13 @@ func (a *MainApp) MakeUI() {
 		numCols = len(a.Processor.TableData[0])
 	}
 	for i := 0; i < numCols; i++ {
-		a.PreviewTable.SetColumnWidth(i, 150)
+		a.PreviewTable.SetColumnWidth(i, 100)
 	}
+
 	// Create the main content layout
 	content := container.NewBorder(
 		container.NewVBox(
+
 			TitleContainer,
 			widget.NewSeparator(),
 			fileInfo,
@@ -144,6 +152,7 @@ func (a *MainApp) MakeUI() {
 		nil,
 		container.NewScroll(a.PreviewTable),
 	)
+	
 	// Set the content
 	a.Window.SetContent(content)
 }
