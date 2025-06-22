@@ -41,8 +41,8 @@ func InitializeApp(app fyne.App, window fyne.Window) *MainApp {
 	return &MainApp{
 		App:       app,
 		Window:    window,
-		Processor: NewFileProcessor(),
-		DarkMode:  isDark,
+		Processor: NewFileProcessor(), // Create a new FileProcessor instance
+		DarkMode:  isDark,             // Save the dark mode preference
 	}
 }
 
@@ -205,14 +205,7 @@ func (a *MainApp) SelectTableFile() {
 			return
 		}
 		a.PreviewTable.Refresh()
-		// Update the table columns
-		numCols := 1
-		if len(a.Processor.TableData) > 0 {
-			numCols = len(a.Processor.TableData[0])
-		}
-		for i := 0; i < numCols; i++ {
-			a.PreviewTable.SetColumnWidth(i, 150)
-		}
+		a.AutoUpdateColumnWidths() // Update the table columns
 		a.StatusLabel.SetText(fmt.Sprintf("All data loaded: %d rows", len(a.Processor.TableData)))
 	}, a.Window).Show()
 }
@@ -245,27 +238,61 @@ func (a *MainApp) ClearAll() {
 	a.PreviewTable.Refresh()
 }
 
-// Create folders based on the loaded table data
+// Generate folders and update the status label
 func (a *MainApp) GenerateFolders() {
+	// Ensure a file is selected
 	if a.Processor.TableFilePath == "" {
 		a.StatusLabel.SetText("Select a file first!")
 		return
 	}
+	// Ensure a destination path is selected
 	if a.Processor.DestPath == "" {
 		a.StatusLabel.SetText("Select a target path first!")
 		return
 	}
+	// Ensure there is data to process
 	if len(a.Processor.TableData) == 0 {
 		a.StatusLabel.SetText("No available data!")
 		return
 	}
-
+	// Call the method to batch create folders
+	// returning the number of successes and any error encountered
 	successCount, err := a.Processor.GenerateFolders()
 	if err != nil {
 		a.StatusLabel.SetText("Error: " + err.Error())
 		return
 	}
+	a.PreviewTable.Refresh()
 	a.StatusLabel.SetText(fmt.Sprintf("Sucessfully created %d folder(s)", successCount))
+}
+
+// Adjusts the column widths based on the content
+func (a *MainApp) AutoUpdateColumnWidths() {
+	minWidth := float32(80)
+	padding := float32(20)
+	if len(a.Processor.TableData) == 0 {
+		a.PreviewTable.SetColumnWidth(0, float32(minWidth)) // If no data, set a default width
+		return
+	}
+	numCols := len(a.Processor.TableData[0]) // Get the number of columns
+	// Extract each column and update its width
+	for col := 0; col < numCols; col++ {
+		maxLen := float32(0) // No length limit
+		// Extract each row in the column
+		for row := 0; row < len(a.Processor.TableData); row++ {
+			cellText := a.Processor.TableData[row][col]
+			// Use MeasureText to calculate the width of the cell
+			cellSize := fyne.MeasureText(cellText, theme.TextSize(), fyne.TextStyle{})
+			// Update the maximum width of the cell
+			if cellSize.Width > maxLen {
+				maxLen = cellSize.Width
+			}
+		}
+		// Add padding to the maximum length, ensure the width is larger than the minWidth
+		width := max(maxLen+padding, minWidth)
+		// Update column width
+		a.PreviewTable.SetColumnWidth(col, width)
+	}
 }
 
 // Toggle the theme between light and dark mode
