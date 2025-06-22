@@ -81,8 +81,8 @@ func (a *MainApp) MakeUI() {
 		a.ThemeButton,
 	)
 	// Create scrollable path displays
-	a.FilePath = CreatePathDisplay()
-	a.DestPath = CreatePathDisplay()
+	a.FilePath = CreatePathDisplay(a.Window)
+	a.DestPath = CreatePathDisplay(a.Window)
 	// Refresh the colors of the path displays based on the theme
 	a.FilePath.RefreshColor(a.DarkMode)
 	a.DestPath.RefreshColor(a.DarkMode)
@@ -149,15 +149,21 @@ func (a *MainApp) MakeUI() {
 }
 
 // Use canvas to display file paths
-func CreatePathDisplay() *PathDisplay {
+func CreatePathDisplay(window fyne.Window) *PathDisplay {
 	// Set text first
 	text := canvas.NewText("No Selection", color.Black)
 	text.TextSize = 14
 	text.TextStyle = fyne.TextStyle{Monospace: false, Bold: true}
 	// Create a scrollable container for the text
 	scroll := container.NewHScroll(text)
+	// Get width of the window
+	windowWidth := window.Canvas().Size().Width
 	// Set min size for labels and add scrolls
-	scroll.SetMinSize(fyne.NewSize(475, 45))
+	minWidth := float32(400)
+	// Calculate target width
+	targetWidth := windowWidth * 0.8
+	scrollLength := max(targetWidth, minWidth)
+	scroll.SetMinSize(fyne.NewSize(scrollLength, 45))
 	return &PathDisplay{
 		Text:      text,
 		Container: scroll,
