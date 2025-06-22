@@ -223,12 +223,11 @@ func (a *MainApp) SelectTableFile() {
 			a.StatusLabel.SetText("Failed to load: " + err.Error())
 			return
 		}
+		// Ensure the container is using the new table
+		a.PreviewTable = a.InitializeTable() // Load new data
+		a.PreviewTableContainer.Content = a.PreviewTable
 		a.AutoUpdateColumnWidths() // Update the table columns
-		a.PreviewTable.Refresh()
-		a.PreviewTableContainer.Refresh()
-		// Reset scrollbar
-		a.PreviewTableContainer.ScrollToTop()
-		a.PreviewTableContainer.Offset = fyne.Position{X: 0, Y: 0}
+		a.ResetTableScroll()       // Reset the table scrollbar
 		a.PreviewTableContainer.Refresh()
 		a.StatusLabel.SetText(fmt.Sprintf("All data loaded: %d rows", len(a.Processor.TableData)))
 	}, a.Window).Show()
@@ -253,31 +252,51 @@ func (a *MainApp) SelectDestination() {
 
 // Clear all content in the table
 func (a *MainApp) ClearAll() {
+	// Reset FilePath and DestPath
 	a.FilePath.Text.Text = "No Selection"
 	a.FilePath.Text.Refresh()
-	a.FilePath.Container.Offset = fyne.Position{X: 0, Y: 0} // Reset scrollbar position
-	a.FilePath.Container.Refresh()
 	a.DestPath.Text.Text = "No Selection"
 	a.DestPath.Text.Refresh()
-	a.DestPath.Container.Offset = fyne.Position{X: 0, Y: 0} // Reset scrollbar position
-	a.DestPath.Container.Refresh()
-	a.Processor.Clear()
-	// Skip clearing if no table is loaded
-	if len(a.Processor.TableData) == 0 {
-		// Empty implementation
-	} else {
-		a.ResetTable()
-		a.PreviewTableContainer.Offset = fyne.Position{X: 0, Y: 0}
-	}
+	a.ResetPathScroll()
+	// Reset Processor
+	a.Processor = NewFileProcessor()
+	// Reset table
+	a.PreviewTable = a.InitializeTable()
+	// Update table container
+	a.PreviewTableContainer.Content = a.PreviewTable
+	// Reset scrollbar of table container
+	a.ResetTableScroll()
+	// Update status
 	a.StatusLabel.SetText("All content cleared")
+}
+
+// Reset scrollbar of PathDisplay
+func (a *MainApp) ResetPathScroll() {
+	if a.FilePath != nil {
+		a.FilePath.Container.Offset = fyne.Position{X: 0, Y: 0}
+		a.FilePath.Container.Refresh()
+	}
+	if a.DestPath != nil {
+		a.DestPath.Container.Offset = fyne.Position{X: 0, Y: 0}
+		a.DestPath.Container.Refresh()
+	}
+}
+
+// Reset scrollbar of table
+func (a *MainApp) ResetTableScroll() {
+	if a.PreviewTableContainer != nil {
+		a.PreviewTableContainer.ScrollToTop()
+		a.PreviewTableContainer.Offset = fyne.Position{X: 0, Y: 0}
+		a.PreviewTableContainer.Refresh()
+	}
 }
 
 // Create table
 func (a *MainApp) InitializeTable() *widget.Table {
-	a.PreviewTable = widget.NewTable(
+	return widget.NewTable(
 		func() (int, int) {
-			if len(a.Processor.TableData) == 0 {
-				return 0, 0
+			if a.Processor == nil || len(a.Processor.TableData) == 0 {
+				return 0, 0 // Check data in the Processor
 			}
 			return len(a.Processor.TableData), len(a.Processor.TableData[0])
 		},
@@ -286,14 +305,15 @@ func (a *MainApp) InitializeTable() *widget.Table {
 		},
 		func(i widget.TableCellID, o fyne.CanvasObject) {
 			label := o.(*widget.Label)
-			if len(a.Processor.TableData) > i.Row && len(a.Processor.TableData[i.Row]) > i.Col {
+			if a.Processor != nil &&
+				len(a.Processor.TableData) > i.Row &&
+				len(a.Processor.TableData[i.Row]) > i.Col {
 				label.SetText(a.Processor.TableData[i.Row][i.Col])
 			} else {
 				label.SetText("")
 			}
 		},
 	)
-	return a.PreviewTable
 }
 
 // Generate folders and update the status label
