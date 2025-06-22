@@ -120,9 +120,12 @@ func (a *MainApp) MakeUI() {
 			}
 		},
 	)
-	// Config table's cloumn widths
-	a.PreviewTable.SetColumnWidth(0, 150)
-	for i := 1; i < 20; i++ {
+	// Config table's column widths
+	numCols := 1
+	if len(a.Processor.TableData) > 0 {
+		numCols = len(a.Processor.TableData[0])
+	}
+	for i := 0; i < numCols; i++ {
 		a.PreviewTable.SetColumnWidth(i, 150)
 	}
 	// Create the main content layout
@@ -174,6 +177,7 @@ func (pd *PathDisplay) RefreshColor(isDark bool) {
 // Select a file to load table data
 func (a *MainApp) SelectTableFile() {
 	dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
+		// Check file type and handle errors
 		if err != nil {
 			a.StatusLabel.SetText("Wrong file: " + err.Error())
 			return
@@ -181,6 +185,7 @@ func (a *MainApp) SelectTableFile() {
 		if reader == nil {
 			return
 		}
+		// Handle the file path
 		FilePath := reader.URI().Path()
 		if runtime.GOOS == "windows" {
 			// Remove leading slash for Windows paths
@@ -193,7 +198,6 @@ func (a *MainApp) SelectTableFile() {
 		// Set the file path to the label
 		a.FilePath.Text.Text = FilePath
 		a.FilePath.Text.Refresh()
-		// a.FilePath.Path.Text = filepath.Base(FilePath)
 		a.StatusLabel.SetText("Loading...")
 		// Load the file
 		if err := a.Processor.LoadFile(FilePath); err != nil {
@@ -201,6 +205,14 @@ func (a *MainApp) SelectTableFile() {
 			return
 		}
 		a.PreviewTable.Refresh()
+		// Update the table columns
+		numCols := 1
+		if len(a.Processor.TableData) > 0 {
+			numCols = len(a.Processor.TableData[0])
+		}
+		for i := 0; i < numCols; i++ {
+			a.PreviewTable.SetColumnWidth(i, 150)
+		}
 		a.StatusLabel.SetText(fmt.Sprintf("All data loaded: %d rows", len(a.Processor.TableData)))
 	}, a.Window).Show()
 }
