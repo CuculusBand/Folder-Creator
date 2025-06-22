@@ -16,7 +16,7 @@ func main() {
 	// Create the window
 	MainWindow := MyApp.NewWindow("Folder Creator")
 	MainWindow.Resize(fyne.NewSize(650, 900))
-	MainWindow.SetFixedSize(true)
+	MainWindow.SetFixedSize(false)
 	MainWindow.CenterOnScreen()
 	app := InitializeApp(MyApp, MainWindow)
 	time.Sleep(50 * time.Millisecond)
