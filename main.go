@@ -15,7 +15,7 @@ func main() {
 	MyApp.Settings().SetTheme(&appTheme{regularFont: AppFont})
 	// Create the window
 	MainWindow := MyApp.NewWindow("Folder Creator")
-	MainWindow.Resize(fyne.NewSize(600, 800))
+	MainWindow.Resize(fyne.NewSize(650, 900))
 	MainWindow.SetFixedSize(true)
 	MainWindow.CenterOnScreen()
 	app := InitializeApp(MyApp, MainWindow)
