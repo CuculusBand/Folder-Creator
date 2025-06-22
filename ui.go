@@ -29,6 +29,7 @@ type MainApp struct {
 	DarkMode     bool
 }
 
+// PathDisplay shows the file or folder path in a scrollable text container
 type PathDisplay struct {
 	Text      *canvas.Text
 	Container *container.Scroll
@@ -46,9 +47,9 @@ func InitializeApp(app fyne.App, window fyne.Window) *MainApp {
 
 // Sets up the UI for the application
 func (a *MainApp) MakeUI() {
-	// Add theme control button
+	// Add theme control button, refreshes the theme when clicked
 	a.ThemeButton = widget.NewButton("🌙", a.ToggleTheme)
-	// Set the DarkMode
+	// Set the theme when the app starts
 	a.SetTheme(a.DarkMode)
 	// Create buttons
 	FileSelectButton := widget.NewButton("Select File", a.SelectTableFile)
@@ -67,13 +68,13 @@ func (a *MainApp) MakeUI() {
 	)
 	// Set the title of the app
 	Title := widget.NewLabel("<Folder Creator>")
+	// Title and theme button layout
 	TitleContainer := container.NewHBox(
 		Title,
 		layout.NewSpacer(),
 		a.ThemeButton,
 	)
-	// Create Labels for paths
-	// Set min size for labels and add scrolls
+	// Create scrollable path displays
 	a.FilePath = CreatePathDisplay()
 	a.DestPath = CreatePathDisplay()
 	// Create status Lables
@@ -135,20 +136,30 @@ func (a *MainApp) MakeUI() {
 	a.Window.SetContent(content)
 }
 
-// Use widget.Entry to create a label for displaying file paths
+// Use canvas to display file paths
 func CreatePathDisplay() *PathDisplay {
 	// Set text first
-	Text := canvas.NewText("No Selection", color.Black)
-	Text.TextSize = 15
-	Text.TextStyle = fyne.TextStyle{Monospace: false, Bold: true}
+	text := canvas.NewText("No Selection", color.Black)
+	text.TextSize = 14
+	text.TextStyle = fyne.TextStyle{Monospace: false, Bold: true}
 	// Create a scrollable container for the text
-	Scroll := container.NewHScroll(Text)
-	Scroll.SetMinSize(fyne.NewSize(475, 45))
+	scroll := container.NewHScroll(text)
+	// Set min size for labels and add scrolls
+	scroll.SetMinSize(fyne.NewSize(475, 45))
 	return &PathDisplay{
-		Text:      Text,
-		Container: Scroll,
+		Text:      text,
+		Container: scroll,
 	}
+}
 
+// Refreshes PathDisplay's text color based on the theme
+func (pd *PathDisplay) RefreshColor(isDark bool) {
+	if isDark {
+		pd.Text.Color = color.White // Use White for dark theme
+	} else {
+		pd.Text.Color = color.Black // Use Black for light theme
+	}
+	pd.Text.Refresh()
 }
 
 // Select a file to load table data
@@ -237,11 +248,12 @@ func (a *MainApp) GenerateFolders() {
 }
 
 // Toggle the theme between light and dark mode
-func (a *MainApp) SetTheme(dark bool) {
-	a.DarkMode = dark
+func (a *MainApp) SetTheme(isDark bool) {
+	a.DarkMode = isDark
 	// Save the theme preference
-	a.App.Preferences().SetBool("dark_mode", dark)
-	if dark {
+	// Set Theme based on the button state
+	a.App.Preferences().SetBool("dark_mode", isDark)
+	if isDark {
 		a.App.Settings().SetTheme(theme.DarkTheme())
 	} else {
 		a.App.Settings().SetTheme(theme.LightTheme())
@@ -252,9 +264,12 @@ func (a *MainApp) SetTheme(dark bool) {
 func (a *MainApp) ToggleTheme() {
 	a.SetTheme(!a.DarkMode)
 	if a.DarkMode {
-		a.ThemeButton.SetText("☀️") // Show moon if dark mode is disabled
+		a.ThemeButton.SetText("☀️") // Show sun icon if dark mode is enabled
 	} else {
-		a.ThemeButton.SetText("🌙") // Show sun icon if dark mode is enabled
+		a.ThemeButton.SetText("🌙") // Show moon icon if dark mode is disabled
 	}
 	a.Window.Content().Refresh()
+	// Update PathDisplays's colors
+	a.FilePath.RefreshColor(a.DarkMode)
+	a.DestPath.RefreshColor(a.DarkMode)
 }
