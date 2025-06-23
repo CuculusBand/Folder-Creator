@@ -51,6 +51,10 @@ func InitializeApp(app fyne.App, window fyne.Window) *MainApp {
 // Sets up the UI for the application
 func (a *MainApp) MakeUI() {
 
+	// Create a rectangle to control the minimum size of the window
+	bg := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
+	bg.SetMinSize(fyne.NewSize(600, 500))
+
 	// Set the theme based on the dark mode preference when the app starts
 	a.SetTheme(a.DarkMode)
 	// Add theme control button, refreshes the theme when clicked
@@ -61,9 +65,8 @@ func (a *MainApp) MakeUI() {
 		a.ThemeButton = widget.NewButton("🌙", a.ToggleTheme)
 	}
 
-	// Create a rectangle to control the minimum size of the window
-	bg := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
-	bg.SetMinSize(fyne.NewSize(600, 500))
+	// Create about button
+	aboutButton := widget.NewButton("About", func() { a.ShowAbout(a.Window) })
 
 	// Set the title of the app
 	title := widget.NewLabel("<Folder Creator>")
@@ -71,6 +74,7 @@ func (a *MainApp) MakeUI() {
 	TitleContainer := container.NewHBox(
 		title,
 		layout.NewSpacer(),
+		aboutButton,
 		a.ThemeButton,
 	)
 
@@ -420,4 +424,15 @@ func (a *MainApp) Cleanup() {
 	a.Processor = nil
 	a.PreviewTable = nil
 	runtime.GC()
+}
+
+// Show copyright
+func (a *MainApp) ShowAbout(win fyne.Window) {
+	aboutContent := `Folder Creator v1.1.0
+
+© 2025 Cuculus Band
+Licensed under the GNU GPL v3.0
+Source: https://github.com/CuculusBand/Folder-Creator`
+
+	dialog.ShowInformation("About", aboutContent, win)
 }
