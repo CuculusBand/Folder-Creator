@@ -428,7 +428,7 @@ func (a *MainApp) Cleanup() {
 
 // Show copyright
 func (a *MainApp) ShowAbout(win fyne.Window) {
-	aboutContent := `Folder Creator v1.1.0
+	aboutContent := `Folder Creator v1.0.0
 
 © 2025 Cuculus Band
 Licensed under the GNU GPL v3.0
