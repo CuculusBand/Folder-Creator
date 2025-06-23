@@ -1,0 +1,27 @@
+1 VERSIONINFO
+FILEVERSION     1,0,0,0
+PRODUCTVERSION  1,0,0,0
+FILEOS          0x4
+FILETYPE        0x1
+{
+  BLOCK "StringFileInfo"
+  {
+    BLOCK "040904b0"
+    {
+      VALUE "CompanyName",      "Cuculus Band"
+      VALUE "FileDescription",  "Folder Creator"
+      VALUE "FileVersion",      "1.0.0"
+      VALUE "ProductVersion",   "1.0.0"
+      VALUE "InternalName",     "FolderCreator"
+      VALUE "OriginalFilename", "FolderCreator.exe"
+      VALUE "ProductName",      "Folder Creator"
+      VALUE "LegalCopyright",   "© 2025 Cuculus Band. Licensed under the GPL v3"
+    }
+  }
+  BLOCK "VarFileInfo"
+  {
+    VALUE "Translation", 0x409, 1200
+  }
+}
+
+IDI_ICON1 ICON "GO-FolderCreator-icon.ico"
