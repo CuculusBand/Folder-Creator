@@ -432,7 +432,7 @@ func (a *MainApp) ShowAbout(win fyne.Window) {
 
 © 2025 Cuculus Band
 Licensed under the GNU GPL v3.0
-Source: https://github.com/CuculusBand/Folder-Creator`
-
+Source: https://github.com/CuculusBand/Folder-Creator
+Uses Fyne GUI toolkit (© 2018-present The Fyne Authors) under BSD-3-Clause license`
 	dialog.ShowInformation("About", aboutContent, win)
 }
