@@ -425,8 +425,6 @@ func (a *MainApp) ToggleTheme() {
 
 // Cleanup ram
 func (a *MainApp) Cleanup() {
-	a.Processor = nil
-	a.PreviewTable = nil
 	runtime.GC()
 }
 
