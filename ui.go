@@ -79,8 +79,8 @@ func (a *MainApp) MakeUI() {
 	)
 
 	// Create scrollable path displays
-	a.FilePath = NewPathDisplay(a.Window)
-	a.DestPath = NewPathDisplay(a.Window)
+	a.FilePath = NewPathDisplay(a.App, a.Window)
+	a.DestPath = NewPathDisplay(a.App, a.Window)
 	// Refresh the colors of the path displays based on the theme
 	a.FilePath.RefreshColor(a.DarkMode)
 	a.DestPath.RefreshColor(a.DarkMode)
@@ -165,7 +165,7 @@ func (a *MainApp) MakeUI() {
 }
 
 // Use canvas to display file paths
-func NewPathDisplay(window fyne.Window) *PathDisplay {
+func NewPathDisplay(app fyne.App, window fyne.Window) *PathDisplay {
 	// Set text first
 	text := canvas.NewText("No Selection", color.Black)
 	text.TextSize = 14
