@@ -149,20 +149,20 @@ func (a *MainApp) MakeUI() {
 	// Set the content
 	a.Window.SetContent(fullWindow)
 
-// 	// Update PathDisplays' width based on window size
-// 	go func() {
-// 		lastSize := a.Window.Canvas().Size()
-// 		for {
-// 			currentSize := a.Window.Canvas().Size()
-// 			if currentSize != lastSize {
-// 				a.FilePath.UpdatePathDisplayWidth(a.Window)
-// 				a.DestPath.UpdatePathDisplayWidth(a.Window)
-// 				lastSize = currentSize
-// 			}
-// 			time.Sleep(100 * time.Millisecond)
-// 		}
-// 	}()
-// }
+	// 	// Update PathDisplays' width based on window size
+	// 	go func() {
+	// 		lastSize := a.Window.Canvas().Size()
+	// 		for {
+	// 			currentSize := a.Window.Canvas().Size()
+	// 			if currentSize != lastSize {
+	// 				a.FilePath.UpdatePathDisplayWidth(a.Window)
+	// 				a.DestPath.UpdatePathDisplayWidth(a.Window)
+	// 				lastSize = currentSize
+	// 			}
+	// 			time.Sleep(100 * time.Millisecond)
+	// 		}
+	// 	}()
+}
 
 // Use canvas to display file paths
 func NewPathDisplay(app fyne.App, window fyne.Window) *PathDisplay {
