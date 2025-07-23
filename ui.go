@@ -419,9 +419,6 @@ func (a *MainApp) ToggleTheme() {
 	// Update PathDisplays's colors
 	a.FilePath.RefreshColor(a.DarkMode)
 	a.DestPath.RefreshColor(a.DarkMode)
-	runtime.GC() // Cleanup ram
-	// Refresh window
-	time.Sleep(100 * time.Millisecond)
 	a.Window.Content().Refresh()
 	runtime.GC() // Cleanup ram
 }
