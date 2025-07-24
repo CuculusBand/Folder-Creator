@@ -9,7 +9,7 @@ import (
 
 func main() {
 	// Create the application
-	MyApp := app.NewWithID("FolderCreator")
+	MyApp := app.NewWithID("Folder Creator")
 	// Load and Set the custom font file
 	//customFont := fyne.NewStaticResource("NotoSans", LoadFont("fonts/NotoSans-SemiBold.ttf"))
 	MyApp.Settings().SetTheme(&appTheme{regularFont: AppFont})
@@ -17,6 +17,7 @@ func main() {
 	var iconData []byte
 	icon := fyne.NewStaticResource("GO-FolderCreator-icon.png", iconData)
 	MyApp.SetIcon(icon)
+
 	// Create the window
 	MainWindow := MyApp.NewWindow("Folder Creator")
 	MainWindow.Resize(fyne.NewSize(600, 850))

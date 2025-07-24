@@ -1,6 +1,6 @@
 1 VERSIONINFO
-FILEVERSION     1,0,0,0
-PRODUCTVERSION  1,0,0,0
+FILEVERSION     1,0,1,0
+PRODUCTVERSION  1,0,1,0
 FILEOS          0x4
 FILETYPE        0x1
 {
@@ -10,8 +10,8 @@ FILETYPE        0x1
     {
       VALUE "CompanyName",      "Cuculus Band"
       VALUE "FileDescription",  "Folder Creator"
-      VALUE "FileVersion",      "1.0.0"
-      VALUE "ProductVersion",   "1.0.0"
+      VALUE "FileVersion",      "1.0.1"
+      VALUE "ProductVersion",   "1.0.1"
       VALUE "InternalName",     "FolderCreator"
       VALUE "OriginalFilename", "FolderCreator.exe"
       VALUE "ProductName",      "Folder Creator"
