@@ -13,16 +13,14 @@ func main() {
 	// Load and Set the custom font file
 	//customFont := fyne.NewStaticResource("NotoSans", LoadFont("fonts/NotoSans-SemiBold.ttf"))
 	MyApp.Settings().SetTheme(&appTheme{regularFont: AppFont})
-	// Set the application icon from a byte slice
-	var iconData []byte
-	icon := fyne.NewStaticResource("GO-FolderCreator-icon.png", iconData)
-	MyApp.SetIcon(icon)
+	MyApp.SetIcon(resourceGOFolderCreatorIconPng) // Use bundeled icon
 
 	// Create the window
 	MainWindow := MyApp.NewWindow("Folder Creator")
 	MainWindow.Resize(fyne.NewSize(600, 850))
 	MainWindow.SetFixedSize(false)
 	MainWindow.CenterOnScreen()
+	MainWindow.SetIcon(resourceGOFolderCreatorIconPng) // Use bundeled icon
 	app := InitializeApp(MyApp, MainWindow)
 	time.Sleep(50 * time.Millisecond)
 	// Create UI
